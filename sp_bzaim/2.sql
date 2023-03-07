@@ -1,29 +1,29 @@
 CREATE OR REPLACE procedure sp_bzaim
 (
-v_dat_t date,                    -- Конец даты на программе который выбирает пользователь.Тем самым передает их на Jasper отчет. Например -> 31.05.2022
-v_raion spr_t$raion.kod%type,    -- Код нужного района
-v_sector st_sector.kod%type,     -- Код нужного сектора
-r_g spr_t$raion.kod%type         -- 1 - группировать по районам. 0 - не группировать
+v_dat_t date,                    -- РљРѕРЅРµС† РґР°С‚С‹ РЅР° РїСЂРѕРіСЂР°РјРјРµ РєРѕС‚РѕСЂС‹Р№ РІС‹Р±РёСЂР°РµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ.РўРµРј СЃР°РјС‹Рј РїРµСЂРµРґР°РµС‚ РёС… РЅР° Jasper РѕС‚С‡РµС‚ -> 31.05.2022
+v_raion spr_t$raion.kod%type,    -- РљРѕРґ РЅСѓР¶РЅРѕРіРѕ СЂР°Р№РѕРЅР°
+v_sector st_sector.kod%type,     -- РљРѕРґ РЅСѓР¶РЅРѕРіРѕ СЃРµРєС‚РѕСЂР°
+r_g spr_t$raion.kod%type         -- 1 - РіСЂСѓРїРїРёСЂРѕРІР°С‚СЊ РїРѕ СЂР°Р№РѕРЅР°Рј. 0 - РЅРµ РіСЂСѓРїРїРёСЂРѕРІР°С‚СЊ
 )
 is 
-p_dat_t_1 varchar2(20);        -- начало тек.года
-p_dat_t_2 varchar2(20);        -- начало след.года
-i number(20);                  -- разница по месяцам
-p_tek_mes date;                -- текущий месяц
-p_tek_god varchar2(20);        -- текущий год
-p_i_dat date;                  -- все месяца тек.года (01.01.2022,01.02.2022,01.03.2022, ... 01.01.2023)
+p_dat_t_1 varchar2(20);        -- РЅР°С‡Р°Р»Рѕ С‚РµРє.РіРѕРґР°
+p_dat_t_2 varchar2(20);        -- РЅР°С‡Р°Р»Рѕ СЃР»РµРґ.РіРѕРґР°
+i number(20);                  -- СЂР°Р·РЅРёС†Р° РїРѕ РјРµСЃСЏС†Р°Рј
+p_tek_mes date;                -- С‚РµРєСѓС‰РёР№ РјРµСЃСЏС†
+p_tek_god varchar2(20);        -- С‚РµРєСѓС‰РёР№ РіРѕРґ
+p_i_dat date;                  -- РІСЃРµ РјРµСЃСЏС†Р° С‚РµРє.РіРѕРґР° (01.01.2022,01.02.2022,01.03.2022, ... 01.01.2023)
 
 begin
-p_dat_t_1 := to_char(TRUNC(v_dat_t,'YEAR'), 'DD/MM/rrrr');       -- 2022 -> 01 || 01 || 2022 -> 01.01.2022. Беру только год из переданный даты. Потом укажу начало тек.года
-p_dat_t_2 := last_day(v_dat_t) + 1;                              -- 31.12.2022 + 1 -> 01.01.2023. if 31.05.2022 then + 1 -> 01.06.2022. Переобразую
-i := months_between(to_date(p_dat_t_2, 'dd.mm.rrrr'), to_date(p_dat_t_1, 'dd.mm.rrrr'));                      -- Нахожу разницу месяцов, чтобы указать в цикле количество повторений. В нашем случае 01.06.2022 - 01.01.2022=5 
+p_dat_t_1 := to_char(TRUNC(v_dat_t,'YEAR'), 'DD/MM/rrrr');       -- 2022 -> 01 || 01 || 2022 -> 01.01.2022. Р‘РµСЂСѓ С‚РѕР»СЊРєРѕ РіРѕРґ РёР· РїРµСЂРµРґР°РЅРЅС‹Р№ РґР°С‚С‹. РџРѕС‚РѕРј СѓРєР°Р¶Сѓ РЅР°С‡Р°Р»Рѕ С‚РµРє.РіРѕРґР°
+p_dat_t_2 := last_day(v_dat_t) + 1;                              -- 31.12.2022 + 1 -> 01.01.2023. if 31.05.2022 then + 1 -> 01.06.2022. РџРµСЂРµРѕР±СЂР°Р·СѓСЋ
+i := months_between(to_date(p_dat_t_2, 'dd.mm.rrrr'), to_date(p_dat_t_1, 'dd.mm.rrrr'));                      -- РќР°С…РѕР¶Сѓ СЂР°Р·РЅРёС†Сѓ РјРµСЃСЏС†РѕРІ, С‡С‚РѕР±С‹ СѓРєР°Р·Р°С‚СЊ РІ С†РёРєР»Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ. Г‚ Г­Г ГёГҐГ¬ Г±Г«ГіГ·Г ГҐ 01.06.2022 - 01.01.2022=5 
 p_i_dat := p_dat_t_1;
 
 delete from wg_bzaim;
-loop                                                             --Запускаю цикл 5 раз
+loop                                                             --Р—Р°РїСѓСЃРєР°СЋ С†РёРєР» 5 СЂР°Р·
     delete from wk_g$dat;
-    insert into wk_g$dat(dat_n,dat_k)values(to_date(p_i_dat, 'dd.mm.rrrr'),to_date(last_day(p_i_dat), 'dd.mm.rrrr')+1);  --Заполняю временную таблицу нужными датами. Пример -> сначала заполняется  за январь , потом за февраль до мая. Май не входит     
-    insert into wg_bzaim                                         --Заполняю временную таблицу через select
+    insert into wk_g$dat(dat_n,dat_k)values(to_date(p_i_dat, 'dd.mm.rrrr'),to_date(last_day(p_i_dat), 'dd.mm.rrrr')+1);  --Р—Р°РїРѕР»РЅСЏСЋ РІСЂРµРјРµРЅРЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ РЅСѓР¶РЅС‹РјРё РґР°С‚Р°РјРё. РџСЂРёРјРµСЂ -> СЃРЅР°С‡Р°Р»Р° Р·Р°РїРѕР»РЅСЏРµС‚СЃСЏ  Р·Р° СЏРЅРІР°СЂСЊ , РїРѕС‚РѕРј Р·Р° С„РµРІСЂР°Р»СЊ РґРѕ РјР°СЏ. РњР°Р№ РЅРµ РІС…РѕРґРёС‚     
+    insert into wg_bzaim                                         --Р—Р°РїРѕР»РЅСЏСЋ РІСЂРµРјРµРЅРЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ С‡РµСЂРµР· select
 select
     a.kod_t kod_t,
     a.naim_t naim_t,
@@ -42,25 +42,25 @@ select
     nvl(b.kolvo_2,0) kolvo_2,
     nvl(b.nach_kolvo_2,0) nach_kolvo_2,
     case 
-    when p_i_dat = '01.01.2022' then 'Январь' 
-    when p_i_dat = '01.02.2022' then 'Февраль' 
-    when p_i_dat = '01.03.2022' then 'Март' 
-    when p_i_dat = '01.04.2022' then 'Апрель' 
-    when p_i_dat = '01.05.2022' then 'Май' 
-    when p_i_dat = '01.06.2022' then 'Июнь' 
-    when p_i_dat = '01.07.2022' then 'Июль' 
-    when p_i_dat = '01.08.2022' then 'Август' 
-    when p_i_dat = '01.09.2022' then 'Сентябрь' 
-    when p_i_dat = '01.10.2022' then 'Октябрь' 
-    when p_i_dat = '01.11.2022' then 'Ноябрь' 
-    when p_i_dat = '01.12.2022' then 'Декабрь' 
+    when p_i_dat = '01.01.2022' then 'РЇРЅРІР°СЂСЊ' 
+    when p_i_dat = '01.02.2022' then 'Р¤РµРІСЂР°Р»СЊ' 
+    when p_i_dat = '01.03.2022' then 'РњР°СЂС‚' 
+    when p_i_dat = '01.04.2022' then 'РђРїСЂРµР»СЊ' 
+    when p_i_dat = '01.05.2022' then 'РњР°Р№' 
+    when p_i_dat = '01.06.2022' then 'РСЋРЅСЊ' 
+    when p_i_dat = '01.07.2022' then 'РСЋР»СЊ' 
+    when p_i_dat = '01.08.2022' then 'РђРІРіСѓСЃС‚' 
+    when p_i_dat = '01.09.2022' then 'РЎРµРЅС‚СЏР±СЂСЊ' 
+    when p_i_dat = '01.10.2022' then 'РћРєС‚СЏР±СЂСЊ' 
+    when p_i_dat = '01.11.2022' then 'РќРѕСЏР±СЂСЊ' 
+    when p_i_dat = '01.12.2022' then 'Р”РµРєР°Р±СЂСЊ' 
     end mesyac,
     p_i_dat dat_mesyac
 from
 (
     select
         case when '1' = r_g then a.kod_raion else '999' end kod_raion,
-        case when '1' = r_g then a.naim_raion else 'Без группировки' end naim_raion,
+        case when '1' = r_g then a.naim_raion else 'Р‘РµР· РіСЂСѓРїРїРёСЂРѕРІРєРё' end naim_raion,
         a.kod_t kod_t,
         a.naim_t naim_t,
         a.kod_u kod_u,
@@ -84,18 +84,18 @@ from(
 select a.kod_raion kod_raion, a.klas klas, a.kol_hv kol_hv, a.kolvo kolvo_1, 0 kolvo_2,
 a.summa nach_kolvo_1, 0 nach_kolvo_2, b.naim naim from rv_vod_limit a
 join spr_t$klas_obj b on b.kod = a.klas
-where a.kod = 1 and a.naim = '1 категория' and a.kod_raion = nvl(v_raion,a.kod_raion) and a.sector = nvl(v_sector,a.sector)
+where a.kod = 1 and a.naim = '1 ГЄГ ГІГҐГЈГ®Г°ГЁГї' and a.kod_raion = nvl(v_raion,a.kod_raion) and a.sector = nvl(v_sector,a.sector)
 union all
 select a.kod_raion kod_raion, a.klas klas, 0 kol_hv, 0 kolvo_1, a.kolvo kolvo_2,
 0 nach_kolvo_1, a.summa nach_kolvo_2, b.naim naim from rv_vod_limit a
 join spr_t$klas_obj b on b.kod = a.klas
-where a.kod = 2 and a.naim = '2 категория' and a.kod_raion = nvl(v_raion,a.kod_raion) and a.sector = nvl(v_sector,a.sector)
+where a.kod = 2 and a.naim = '2 ГЄГ ГІГҐГЈГ®Г°ГЁГї' and a.kod_raion = nvl(v_raion,a.kod_raion) and a.sector = nvl(v_sector,a.sector)
      ) group by kod_raion, klas, naim
 ) b on b.kol_hv = a.kol
 order by a.kod_raion, a.kod_t, a.kod_u;
-i := i - 1;                                           -- Теперь i = 4
-p_i_dat := last_day(p_i_dat) + 1;                     -- Если в начале p_i_dat = '01.01.2021', Теперь p_i_dat = '01.02.2021'
-exit when i=0;                                        -- Выхожу из цикла когда  i = 0
+i := i - 1;                                           -- РўРµРїРµСЂСЊ i = 4
+p_i_dat := last_day(p_i_dat) + 1;                     -- Р•СЃР»Рё РІ РЅР°С‡Р°Р»Рµ p_i_dat = '01.01.2021', РўРµРїРµСЂСЊ p_i_dat = '01.02.2021'
+exit when i=0;                                        -- Р’С‹С…РѕР¶Сѓ РёР· С†РёРєР»Р° РєРѕРіРґР°  i = 0
 end loop;
 end;
 /
