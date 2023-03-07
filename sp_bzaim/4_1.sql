@@ -5,15 +5,15 @@ begin
 	else raion := :cb.raion;	
 	end if;
 
---Если айпи адрес компьютера не пустой передаю параметры из программы на JASPER отчет
+--Г…Г±Г«ГЁ Г Г©ГЇГЁ Г Г¤Г°ГҐГ± ГЄГ®Г¬ГЇГјГѕГІГҐГ°Г  Г­ГҐ ГЇГіГ±ГІГ®Г© ГЇГҐГ°ГҐГ¤Г Гѕ ГЇГ Г°Г Г¬ГҐГІГ°Г» ГЁГ§ ГЇГ°Г®ГЈГ°Г Г¬Г¬Г» Г­Г  JASPER Г®ГІГ·ГҐГІ
 
 if get_const(102)is not null then
 		    host( 'start iexplore.exe "'
 		    ||get_jrep(1157)
 		    ||'&P_DAT_T='||to_char(to_date(:cb.dat,'dd.mm.rrrr'),'dd.mm.rrrr'));
 else 
-		    message('Нет интеграции с Jasper-отчетом');
-		    message('Нет интеграции с Jasper-отчетом');
+		    message('РќРµС‚ РёРЅС‚РµРіСЂР°С†РёРё СЃ Jasper-РѕС‚С‡РµС‚РѕРј');
+		    message('РќРµС‚ РёРЅС‚РµРіСЂР°С†РёРё СЃ Jasper-РѕС‚С‡РµС‚РѕРј');
 		    raise form_trigger_failure;
 end if;	
 
