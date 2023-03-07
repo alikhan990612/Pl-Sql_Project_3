@@ -5,7 +5,7 @@ begin
 	else raion := :cb.raion;	
 	end if;
 
---Åñëè àéïè àäðåñ êîìïüþòåðà íå ïóñòîé ïåðåäàþ ïàðàìåòðû èç ïðîãðàììû íà JASPER îò÷åò
+--Если айпи адрес компьютера не пустой передаю параметры из программы на JASPER отчет
 
 if get_const(102)is not null then
 		    host( 'start iexplore.exe "'
